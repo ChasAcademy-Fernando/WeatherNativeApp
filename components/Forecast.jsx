@@ -1,5 +1,5 @@
-import { View, Text, Image } from "react-native";
-const Forecast = ({ weather }) => {
+import { Text, Image, TouchableOpacity } from "react-native";
+const Forecast = ({ weather, setForecastday, setShowForecastday, celsius }) => {
   console.log("forecast 7 days working", weather?.forecast?.forecastday);
   return (
     <>
@@ -9,10 +9,14 @@ const Forecast = ({ weather }) => {
         });
         dateString = dateString.split(",")[0];
         return (
-          <View
+          <TouchableOpacity
             key={index}
             className=' flex justify-center items-center w-24 rounded-3xl py-3 space-y-1 mr-4'
             style={{ backgroundColor: "rgba(255, 255, 255, .2)" }}
+            onPress={() => {
+              setForecastday(dayObj);
+              setShowForecastday(true);
+            }}
           >
             <Image
               className=' w-11 h-11'
@@ -22,9 +26,10 @@ const Forecast = ({ weather }) => {
             />
             <Text className=' text-white'>{dateString}</Text>
             <Text className=' text-white text-xl font-semibold'>
-              {dayObj?.day?.avgtemp_c}&#176;
+              {celsius ? dayObj?.day?.avgtemp_c : dayObj?.day?.avgtemp_f}
+              &#176;
             </Text>
-          </View>
+          </TouchableOpacity>
         );
       })}
     </>
