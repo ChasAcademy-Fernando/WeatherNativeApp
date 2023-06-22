@@ -1,6 +1,5 @@
 import { Text, Image, TouchableOpacity } from "react-native";
 const Forecast = ({ weather, setForecastday, setShowForecastday, celsius }) => {
-  console.log("forecast 7 days working", weather?.forecast?.forecastday);
   return (
     <>
       {weather?.forecast?.forecastday.map((dayObj, index) => {

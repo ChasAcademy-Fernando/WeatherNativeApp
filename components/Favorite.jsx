@@ -10,16 +10,16 @@ import {
   ScrollView,
   useWindowDimensions,
   Switch,
+  Button,
 } from "react-native";
 import {
-  HeartIcon,
   ArrowDownCircleIcon,
   ArrowLeftCircleIcon,
   ArrowLeftIcon,
   CalendarDaysIcon,
+  HomeIcon,
+  HomeModernIcon,
   MagnifyingGlassIcon,
-  StarIcon,
-  BookmarkIcon,
 } from "react-native-heroicons/outline";
 import { MapPinIcon } from "react-native-heroicons/solid";
 import Forecast from "../components/Forecast";
@@ -31,41 +31,15 @@ import {
 import * as Progress from "react-native-progress";
 import { getData, storeData } from "../Storage/asyncStorage";
 
-const HomeScreen = ({ navigation }) => {
-  const [showSearch, toggleSearch] = useState(false);
-  const [locations, setLocations] = useState([]);
+const Favorite = ({ city, setGoBack }) => {
   const [weather, setWeather] = useState({});
   const [loading, setLoading] = useState(true);
   const [forecastday, setForecastday] = useState({});
   const [showForecastday, setShowForecastday] = useState(false);
   const [celsius, setCelsius] = useState(true);
-  const [favs, setFavs] = useState([]);
-  const [isFav, setIsFav] = useState(false);
-
-  const handleLocation = (loc) => {
-    setLocations([]);
-    setShowForecastday(false);
-    toggleSearch(false);
-    setLoading(true);
-    fetchWeatherForeCast({ cityName: loc.name }).then(
-      (data) => setWeather(data),
-      setLoading(false),
-      storeData("city", loc.name)
-    );
-  };
-
-  const handelSearch = (value) => {
-    if (value.length > 3) {
-      fetchLocation({ cityName: value }).then((data) => {
-        setLocations(data);
-      });
-    }
-  };
 
   const fetchWeatherStart = async () => {
-    let myCity = await getData("city");
-
-    fetchWeatherForeCast({ cityName: myCity ? `${myCity}` : "Stockholm" }).then(
+    fetchWeatherForeCast({ cityName: city ? `${city}` : "Stockholm" }).then(
       (data) => {
         setWeather(data);
         setLoading(false);
@@ -75,9 +49,6 @@ const HomeScreen = ({ navigation }) => {
   useEffect(() => {
     fetchWeatherStart();
   }, []);
-  const windowHeight = useWindowDimensions().height;
-  const handleSearchDebounce = useCallback(debounce(handelSearch), []);
-  const { current, location } = weather;
   /*Current date */
   let date = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -91,10 +62,13 @@ const HomeScreen = ({ navigation }) => {
     : null;
 
   dateString ? (dateString = dateString.split(",")[0]) : null;
+  const windowHeight = useWindowDimensions().height;
 
+  const { current, location } = weather;
+  console.log(city);
   return (
     <View
-      className='flex-1 relative '
+      className='flex-1 relative'
       style={[{ minHeight: Math.round(windowHeight) }]}
     >
       <StatusBar style='light' />
@@ -107,112 +81,39 @@ const HomeScreen = ({ navigation }) => {
       />
       {loading ? (
         <View className='justify-center flex-1 flex-row items-center'>
+          <Button title='click me'></Button>
           <Progress.CircleSnail thickness={10} size={150} color={"#ffffff"} />
         </View>
       ) : !showForecastday ? (
         <SafeAreaView className='flex flex-1 p-2'>
-          <View
-            style={{ height: "7%" }}
-            className=' flex-row relative z-50 mx-4 space-x-4 items-center'
-          >
-            <View className=' flex-row '>
-              <TouchableOpacity
-                onPress={() => {
-                  navigation.navigate("Favs", { Cities: favs });
-                }}
-              >
-                <BookmarkIcon size={50} fill={"white"} />
-              </TouchableOpacity>
-            </View>
-
-            <View
-              className=' flex-1 flex-row justify-end items-center rounded-full'
-              style={{
-                backgroundColor: showSearch
-                  ? "rgba(255, 255, 255, .3)"
-                  : "transparent",
-              }}
-            >
-              {showSearch ? (
-                <TextInput
-                  onChangeText={handleSearchDebounce}
-                  placeholder=' Search'
-                  placeholderTextColor={"white"}
-                  className=' h-10 flex-1 text-base text-white pl-6'
-                />
-              ) : null}
-
-              <TouchableOpacity
-                onPress={() => {
-                  toggleSearch(!showSearch), setLocations([]);
-                }}
-                style={{ backgroundColor: "rgba(255, 255, 255, .3)" }}
-                className=' rounded-full p-3 m-1'
-              >
-                <MagnifyingGlassIcon size={25} color='white' />
-              </TouchableOpacity>
-            </View>
-            {locations.length > 0 && showSearch ? (
-              <View className=' absolute w-full right-0 bg-gray-300 rounded-3xl top-16'>
-                {locations.map((loc, index) => {
-                  let showBorder = index + 1 != locations.length;
-                  let borderClass = showBorder
-                    ? " border-b-2 border-b-gray-400"
-                    : "";
-                  return (
-                    <TouchableOpacity
-                      onPress={() => {
-                        handleLocation(loc);
-                      }}
-                      key={index}
-                      className={`flex-row items-center border-0 p-3 px-4 my-1 ${borderClass}`}
-                    >
-                      <MapPinIcon size={20} color={"gray"} />
-                      <Text className=' text-lg ml-2 '>
-                        {loc.name}, {loc.country}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            ) : null}
-          </View>
           <View className=' mx-4 flex justify-around flex-1 mb-2'>
+            <View>
+              <TouchableOpacity
+                onPress={() => {
+                  setGoBack(true);
+                }}
+              >
+                <HomeIcon size={50} fill={"white"} />
+              </TouchableOpacity>
+            </View>
             <Text className=' text-white text-center text-2xl font-bold'>
               {location?.name},
               <Text className=' text-lg font-semibold text-gray-300'>
                 {" " + location?.country}
               </Text>
             </Text>
-            <View className='flex-col items-end justify-end  -mt-5'>
-              <View className=' flex-row items-center '>
-                <Switch
-                  value={celsius}
-                  onValueChange={() => {
-                    setCelsius(!celsius);
-                  }}
-                />
-                <Text className=' text-white text-base'>
-                  &#176;{celsius ? "C" : "F"}
-                </Text>
-              </View>
-              <View className='flex-row items-center -mr-2 '>
-                <Switch
-                  value={isFav}
-                  onValueChange={() => {
-                    setIsFav(!isFav);
-
-                    setFavs([...favs, location.name]);
-                  }}
-                />
-                <HeartIcon
-                  fill={isFav ? "red" : "lightgrey"}
-                  className='outline outline-1'
-                  outlsize={25}
-                />
-              </View>
+            <View className='flex-row items-center justify-end  -mt-5 -mb-14'>
+              <Switch
+                value={celsius}
+                onValueChange={() => {
+                  setCelsius(!celsius);
+                }}
+              />
+              <Text className=' text-white text-base'>
+                &#176;{celsius ? "C" : "F"}
+              </Text>
             </View>
-            <View className=' -mt-10 flex-row justify-center'>
+            <View className=' flex-row justify-center'>
               <Image
                 source={{
                   uri: "https:" + current?.condition?.icon,
@@ -235,7 +136,6 @@ const HomeScreen = ({ navigation }) => {
                 {date}
               </Text>
 
-              {/* Fixa celius och farenhait function*/}
               <Text className=' text-center  text-white text-xl tracking-widest'>
                 {current?.condition?.text}
               </Text>
@@ -293,60 +193,6 @@ const HomeScreen = ({ navigation }) => {
       ) : (
         showForecastday && (
           <SafeAreaView className='flex flex-1 p-2'>
-            <View style={{ height: "7%" }} className=' relative z-50 mx-4'>
-              <View
-                className=' flex-row justify-end items-center rounded-full'
-                style={{
-                  backgroundColor: showSearch
-                    ? "rgba(255, 255, 255, .3)"
-                    : "transparent",
-                }}
-              >
-                {showSearch ? (
-                  <TextInput
-                    onChangeText={handleSearchDebounce}
-                    placeholder=' Search'
-                    placeholderTextColor={"white"}
-                    className=' h-10 flex-1 text-base text-white pl-6'
-                  />
-                ) : null}
-
-                <TouchableOpacity
-                  onPress={() => {
-                    toggleSearch(!showSearch);
-                  }}
-                  style={{ backgroundColor: "rgba(255, 255, 255, .3)" }}
-                  className=' rounded-full p-3 m-1'
-                >
-                  <MagnifyingGlassIcon size={25} color='white' />
-                </TouchableOpacity>
-              </View>
-              {locations.length > 0 && showSearch ? (
-                <View className=' absolute w-full bg-gray-300 rounded-3xl top-16'>
-                  {locations.map((loc, index) => {
-                    let showBorder = index + 1 != locations.length;
-                    let borderClass = showBorder
-                      ? " border-b-2 border-b-gray-400"
-                      : "";
-                    return (
-                      <TouchableOpacity
-                        onPress={() => {
-                          handleLocation(loc);
-                        }}
-                        key={index}
-                        className={`flex-row items-center border-0 p-3 px-4 my-1 ${borderClass}`}
-                      >
-                        <MapPinIcon size={20} color={"gray"} />
-                        <Text className=' text-lg ml-2 '>
-                          {loc.name}, {loc.country}
-                        </Text>
-                      </TouchableOpacity>
-                    );
-                  })}
-                </View>
-              ) : null}
-            </View>
-
             <View className=' mx-4 flex justify-around flex-1 mb-2'>
               <Text className=' text-white text-center text-2xl font-bold'>
                 {location?.name},
@@ -461,4 +307,4 @@ const HomeScreen = ({ navigation }) => {
   );
 };
 
-export default HomeScreen;
+export default Favorite;
