@@ -65,7 +65,7 @@ const Favorite = ({ city, setGoBack }) => {
   const windowHeight = useWindowDimensions().height;
 
   const { current, location } = weather;
-  console.log(city);
+
   return (
     <View
       className='flex-1 relative'
@@ -81,7 +81,6 @@ const Favorite = ({ city, setGoBack }) => {
       />
       {loading ? (
         <View className='justify-center flex-1 flex-row items-center'>
-          <Button title='click me'></Button>
           <Progress.CircleSnail thickness={10} size={150} color={"#ffffff"} />
         </View>
       ) : !showForecastday ? (

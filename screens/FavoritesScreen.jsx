@@ -38,11 +38,10 @@ const FavoritesScreen = ({ navigation, route }) => {
       navigation.navigate("Home");
     }
   }, [goback]);
-  console.log(favs);
+
   return (
     <ScrollView>
       {favs.map((city, index) => {
-        console.log(city);
         return (
           <View key={index}>
             <Favorite city={city} setGoBack={setGoBack} />
